@@ -36,6 +36,7 @@ def extract_table_advanced(image_path):
         aggfunc=lambda x: ' '.join(x),
         fill_value=''
     )
+    # добавляю комментарий ))
     
     # Очищаем названия колонок
     table = table.reset_index()
