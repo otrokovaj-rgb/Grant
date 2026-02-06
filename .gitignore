@@ -6,3 +6,4 @@ logs
 temp_downloads
 index_info
 new-env
+.DS_Store
