@@ -1,1 +1,15 @@
 openai
+
+boto3>=1.28.0
+yandex-ai-studio-sdk>=0.1.0
+botocore>=1.31.0
+pyyaml>=6.0
+tqdm>=4.65.0
+
+# Вариант 1: Использование основного SDK
+from yandex.cloud.ai.search.v1 import search_pb2
+from yandex.cloud.ai.search.v1 import search_service_pb2_grpc
+
+# Вариант 2: Импорт через yandexcloud
+import yandexcloud
+from yandexcloud import SDK
