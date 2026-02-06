@@ -2,3 +2,7 @@
 __pycache__
 yandex/config.yaml
 yandex/test
+logs
+temp_downloads
+index_info
+new-env
