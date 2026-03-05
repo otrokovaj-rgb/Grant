@@ -1,0 +1,120 @@
+yawl: '0.1'
+start: init
+steps:
+  init:
+    noOp:
+      output: "\\({\r\n  \"bucket\": \"{{ .event.messages[0].details.bucket_id }}\",\r\n  \"object\": \"{{ .event.messages[0].details.object_id }}\"\r\n})"
+      next: step-switch145
+  step-switch145:
+    switch:
+      choices:
+        - condition: '{{ ".xlsx" in .init.object or ".xls" in .init.object }}'
+          next: call_financial_function
+      default:
+        next: call_scenario_function
+  call_financial_function:
+    httpCall:
+      url: https://functions.yandexcloud.net/d4e92iv3g1msf6oc6356
+      method: POST
+      body: "\\({\r\n  \"bucket\": \"{{ .init.bucket }}\",\r\n  \"object\": \"{{ .init.object }}\"\r\n})"
+      headers:
+        Content-Type: application/json
+      output: '\({{ {"analysis_result": .} }})'
+      next: step-switch903
+    description: ''
+  step-switch903:
+    switch:
+      choices:
+        - condition: '{{ .analysis_result.body.status == "success" }}'
+          next: step-httpCall473
+      default:
+        next: step-httpCall274
+  step-httpCall473:
+    httpCall:
+      url: https://functions.yandexcloud.net/d4etcmi1mjspas4eemg8
+      method: POST
+      body: "{\r\n  \"source_file\": \"{{ .init.object }}\",\r\n  \"analysis_result\": {{ .analysis_result.body }},\r\n  \"destination_bucket\": \"processed-results\"\r\n}"
+      output: '\({"step-httpCall473": .})'
+      next: step-success652
+    description: ''
+  step-success652:
+    success: {}
+  step-httpCall274:
+    httpCall:
+      url: https://functions.yandexcloud.net/d4etcmi1mjspas4eemg8
+      method: POST
+      body: "{\r\n  \"source_file\": \"{{ .init.object }}\",\r\n  \"error\": \"{{ .analysis_result.body.reason }}\",\r\n  \"destination_bucket\": \"quarantine-files\"\r\n}"
+      output: '\({"step-httpCall274": .})'
+      next: step-httpCall212
+    description: ''
+  step-httpCall212:
+    httpCall:
+      url: https://functions.yandexcloud.net/d4eqmksktaq7agcppu10
+      method: POST
+      body: "{\r\n  \"source_bucket\": \"{{ .init.bucket }}\",\r\n  \"source_key\": \"{{ .init.object }}\",\r\n  \"dest_bucket\": \"quarantine-files\",\r\n  \"dest_key\": \"{{ .init.object }}\"\r\n}"
+      output: '\({"step-httpCall212": .})'
+      next: step-httpCall493
+    description: ''
+  step-httpCall493:
+    httpCall:
+      url: https://functions.yandexcloud.net/d4eo7gt1c65upc3eao05
+      method: POST
+      body: "{\r\n  \"bucket\": \"{{ .init.bucket }}\",\r\n  \"key\": \"{{ .init.object }}\"\r\n}"
+      output: '\({"step-httpCall493": .})'
+      next: step-success678
+    description: ''
+  step-success678:
+    success: {}
+  call_scenario_function:
+    httpCall:
+      url: https://functions.yandexcloud.net/d4evq4qqvmrgk9g9dt0e
+      method: POST
+      body: "\\({\r\n  \"bucket\": \"{{ .init.bucket }}\",\r\n  \"object\": \"{{ .init.object }}\"\r\n})"
+      headers:
+        Content-Type: application/json
+      output: '\({"call_scenario_function": .})'
+      next: step-switch854
+    description: ''
+  step-switch854:
+    switch:
+      choices:
+        - condition: '{{ .analysis_result.body.status == "success" }}'
+          next: step-httpCall621
+      default:
+        next: step-httpCall912
+  step-httpCall621:
+    httpCall:
+      url: https://functions.yandexcloud.net/d4etcmi1mjspas4eemg8
+      method: POST
+      body: "{\r\n  \"source_file\": \"{{ .init.object }}\",\r\n  \"analysis_result\": {{ .analysis_result.body }},\r\n  \"destination_bucket\": \"processed-results\"\r\n}"
+      output: '\({"step-httpCall621": .})'
+      next: step-success851
+    description: ''
+  step-success851:
+    success: {}
+  step-httpCall912:
+    httpCall:
+      url: https://functions.yandexcloud.net/d4etcmi1mjspas4eemg8
+      method: POST
+      body: "{\r\n  \"source_file\": \"{{ .init.object }}\",\r\n  \"error\": \"{{ .analysis_result.body.reason }}\",\r\n  \"destination_bucket\": \"quarantine-files\"\r\n}"
+      output: '\({"step-httpCall912": .})'
+      next: step-httpCall381
+    description: ''
+  step-httpCall381:
+    httpCall:
+      url: https://functions.yandexcloud.net/d4eqmksktaq7agcppu10
+      method: POST
+      body: "{\r\n  \"source_bucket\": \"{{ .init.bucket }}\",\r\n  \"source_key\": \"{{ .init.object }}\",\r\n  \"dest_bucket\": \"quarantine-files\",\r\n  \"dest_key\": \"{{ .init.object }}\"\r\n}"
+      output: '\({"step-httpCall381": .})'
+      next: step-httpCall694
+    description: ''
+  step-httpCall694:
+    httpCall:
+      url: https://functions.yandexcloud.net/d4eo7gt1c65upc3eao05
+      method: POST
+      body: "{\r\n  \"bucket\": \"{{ .init.bucket }}\",\r\n  \"key\": \"{{ .init.object }}\"\r\n}"
+      output: '\({"step-httpCall694": .})'
+      next: step-success892
+    description: ''
+  step-success892:
+    success: {}
